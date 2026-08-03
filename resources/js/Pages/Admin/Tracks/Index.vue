@@ -21,7 +21,6 @@ const search = ref(props.filters.search ?? '');
 const perPage = ref(Number(props.filters.per_page ?? 25));
 const categoryId = ref(props.filters.category_id ?? '');
 const cleanupProcessing = ref(false);
-const frCleanupProcessing = ref(false);
 let searchTimer;
 
 const loadTracks = () => {
@@ -61,15 +60,6 @@ const removeBrokenTracks = () => {
     });
 };
 
-const removeFrenchTracks = () => {
-    if (!confirm(trans('Permanently delete every track assigned to the FR category?'))) return;
-
-    frCleanupProcessing.value = true;
-    router.delete(route('admin.tracks.destroy-fr-category'), {
-        preserveScroll: true,
-        onFinish: () => { frCleanupProcessing.value = false; },
-    });
-};
 </script>
 
 <template>
@@ -81,7 +71,6 @@ const removeFrenchTracks = () => {
                     <p class="mt-1 text-sm font-bold text-slate-400">{{ $t(':count tracks in the library', { count: tracks.total }) }}</p>
                 </div>
                 <div class="flex flex-wrap gap-2">
-                    <DangerButton :disabled="frCleanupProcessing" @click="removeFrenchTracks">{{ $t('Delete FR tracks') }}</DangerButton>
                     <DangerButton :disabled="cleanupProcessing" @click="removeBrokenTracks">{{ $t('Remove broken tracks') }}</DangerButton>
                     <Link :href="route('admin.tracks.import.create')"><PrimaryButton>{{ $t('Import tracks') }}</PrimaryButton></Link>
                 </div>
