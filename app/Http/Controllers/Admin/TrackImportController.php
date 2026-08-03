@@ -56,9 +56,23 @@ class TrackImportController extends Controller
             ];
         });
 
+        $categories = Category::whereNull('parent_id')
+            ->with(['children' => fn ($query) => $query->withCount('tracks')->orderBy('name')])
+            ->withCount('tracks')
+            ->orderBy('name')
+            ->get();
+
+        $categories->each(function (Category $category) {
+            $categoryIds = collect([$category->id])->merge($category->children->pluck('id'));
+            $category->setAttribute('total_tracks_count', Track::whereHas(
+                'categories',
+                fn ($query) => $query->whereIn('categories.id', $categoryIds),
+            )->count());
+        });
+
         return Inertia::render('Admin/Tracks/ImportPreview', [
             'results' => $results,
-            'categories' => Category::whereNull('parent_id')->with('children')->orderBy('name')->get(),
+            'categories' => $categories,
         ]);
     }
 

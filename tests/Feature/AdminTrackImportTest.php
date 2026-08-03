@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Category;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
@@ -31,6 +32,8 @@ class AdminTrackImportTest extends TestCase
         });
 
         $admin = User::factory()->create(['is_admin' => true]);
+        $category = Category::create(['name' => 'Movies']);
+        Category::create(['name' => 'Animation', 'parent_id' => $category->id]);
 
         $this->actingAs($admin)->post(route('admin.tracks.import.preview'), [
             'answer_mode' => 'title_only',
@@ -38,7 +41,11 @@ class AdminTrackImportTest extends TestCase
         ])->assertOk()->assertInertia(fn (Assert $page) => $page
             ->component('Admin/Tracks/ImportPreview')
             ->where('results.0.custom_answer', 'Toy Story')
-            ->where('results.1.custom_answer', 'Toy Story'));
+            ->where('results.1.custom_answer', 'Toy Story')
+            ->where('categories.0.name', 'Movies')
+            ->where('categories.0.total_tracks_count', 0)
+            ->where('categories.0.children.0.name', 'Animation')
+            ->where('categories.0.children.0.tracks_count', 0));
 
         $this->assertSame([
             'track:"You’ve Got a Friend in Me" artist:"Randy Newman"',

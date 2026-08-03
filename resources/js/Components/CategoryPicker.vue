@@ -11,11 +11,11 @@ const selected = defineModel({ type: Array, required: true });
 const isChildSelected = (child) => selected.value.includes(child.id);
 
 const isCategoryActive = (category) => selected.value.includes(category.id)
-    || category.children.some((child) => selected.value.includes(child.id));
+    || (category.children ?? []).some((child) => selected.value.includes(child.id));
 
 const toggleCategory = (category) => {
     const ids = new Set(selected.value);
-    const childIds = category.children.map((child) => child.id);
+    const childIds = (category.children ?? []).map((child) => child.id);
 
     if (isCategoryActive(category)) {
         ids.delete(category.id);
@@ -69,9 +69,9 @@ const toggleChild = (child, category) => {
                 </span>
             </button>
 
-            <div v-if="category.children.length && isCategoryActive(category)" class="space-y-1 border-t border-violet-100 p-3 dark:border-white/10">
+            <div v-if="(category.children ?? []).length && isCategoryActive(category)" class="space-y-1 border-t border-violet-100 p-3 dark:border-white/10">
                 <button
-                    v-for="child in category.children"
+                    v-for="child in (category.children ?? [])"
                     :key="child.id"
                     type="button"
                     class="flex w-full items-center justify-between gap-3 rounded-2xl px-3 py-2.5 text-left text-sm font-bold transition"
@@ -86,7 +86,7 @@ const toggleChild = (child, category) => {
                     </span>
                 </button>
             </div>
-            <div v-else-if="!category.children.length && isCategoryActive(category)" class="px-5 py-4 text-xs font-bold text-slate-400">{{ $t('No subcategories') }}</div>
+            <div v-else-if="!(category.children ?? []).length && isCategoryActive(category)" class="px-5 py-4 text-xs font-bold text-slate-400">{{ $t('No subcategories') }}</div>
         </div>
     </div>
 </template>
