@@ -56,7 +56,9 @@ class CategoryController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            Storage::disk('public')->delete($category->image_path);
+            if ($category->image_path) {
+                Storage::disk('public')->delete($category->image_path);
+            }
             $validated['image_path'] = $request->file('image')->store('category-images', 'public');
         }
 
@@ -68,7 +70,9 @@ class CategoryController extends Controller
 
     public function destroy(Category $category): RedirectResponse
     {
-        Storage::disk('public')->delete($category->image_path);
+        if ($category->image_path) {
+            Storage::disk('public')->delete($category->image_path);
+        }
         $category->delete();
 
         return back();
