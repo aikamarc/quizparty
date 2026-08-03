@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root { color-scheme: light; }
+    :root.dark { color-scheme: dark; }
+
+    body {
+        @apply bg-[#f7f5ff] text-slate-900 dark:bg-[#0d0b18] dark:text-slate-100;
+    }
+
+    ::selection { @apply bg-violet-200 text-violet-950 dark:bg-violet-700 dark:text-white; }
+}
+
+@layer components {
+    .qp-shell { @apply mx-auto w-full max-w-6xl px-4 sm:px-6; }
+    .qp-card { @apply rounded-[1.75rem] border border-violet-200/60 bg-white/75 p-6 shadow-[0_8px_30px_rgb(76_29_149/0.07)] backdrop-blur-xl dark:border-violet-300/10 dark:bg-[#171329]/75 dark:shadow-[0_12px_35px_rgb(0_0_0/0.2)]; }
+    .qp-kicker { @apply text-xs font-black uppercase tracking-[0.2em] text-violet-600 dark:text-violet-300; }
+    .qp-title { @apply text-2xl font-black tracking-[-0.03em] text-slate-950 dark:text-white sm:text-3xl; }
+    .qp-muted { @apply text-sm font-medium leading-relaxed text-slate-500 dark:text-slate-400; }
+    .qp-focus { @apply focus:outline-none focus:ring-4 focus:ring-violet-500/20; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .qp-float { animation: qp-float 5s ease-in-out infinite; }
+    @keyframes qp-float { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-10px) rotate(2deg); } }
+}
+
+[x-cloak] {
+    display: none;
+}
