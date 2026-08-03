@@ -324,5 +324,6 @@
     ":count tracks queued for verification. The cleanup continues in the background.": ":count morceaux ont été placés dans la file de vérification. Le nettoyage continue en arrière-plan.",
     "Delete FR tracks": "Supprimer les morceaux FR",
     "Permanently delete every track assigned to the FR category?": "Supprimer définitivement tous les morceaux associés à la catégorie FR ?",
-    ":count FR track(s) deleted.": ":count morceau(x) FR supprimé(s)."
+    ":count FR track(s) deleted.": ":count morceau(x) FR supprimé(s).",
+    "Tracks to import": "Morceaux à importer"
 }

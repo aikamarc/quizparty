@@ -323,5 +323,6 @@
     ":count tracks queued for verification. The cleanup continues in the background.": ":count tracks queued for verification. The cleanup continues in the background.",
     "Delete FR tracks": "Delete FR tracks",
     "Permanently delete every track assigned to the FR category?": "Permanently delete every track assigned to the FR category?",
-    ":count FR track(s) deleted.": ":count FR track(s) deleted."
+    ":count FR track(s) deleted.": ":count FR track(s) deleted.",
+    "Tracks to import": "Tracks to import"
 }
