@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Track;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -65,5 +66,21 @@ class TrackController extends Controller
         $track->delete();
 
         return back();
+    }
+
+    public function tempmarc()
+    {
+        $tracks = Track::where('id', '>', 186)->get();
+        $cat = Category::where('name', 'FR')->first()->id;
+
+        foreach($tracks as $track)
+        {
+            DB::table('category_track')->insert([
+                'category_id' => $cat,
+                'track_id' => $track->id,
+            ]);
+        }
+
+        dd('DONE');
     }
 }

@@ -96,3 +96,5 @@ Route::middleware([
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
     Route::delete('/songless/today', [AdminSonglessController::class, 'resetToday'])->name('songless.reset-today');
 });
+
+Route::get('/tempmarc', [TrackController::class, 'tempmarc'])->name('tempmarc');

@@ -134,7 +134,7 @@ const toggleMicrophone = () => {
     };
     recognition.onresult = (event) => {
         guess.value = event.results[0][0].transcript.trim();
-        nextTick(() => submitGuess());
+        nextTick(() => guessInput.value?.focus());
     };
     recognition.start();
 };
