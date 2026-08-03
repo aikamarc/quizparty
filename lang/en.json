@@ -316,5 +316,12 @@
     "Use the format: answer to find - track title.": "Use the format: answer to find - track title.",
     "Answer to find": "Answer to find",
     "Expected answer": "Expected answer",
-    "Use the format: answer - track title - artist (optional).": "Use the format: answer - track title - artist (optional)."
+    "Use the format: answer - track title - artist (optional).": "Use the format: answer - track title - artist (optional).",
+    "The audio preview could not be loaded. Please refresh the page and try again.": "The audio preview could not be loaded. Please refresh the page and try again.",
+    "Remove broken tracks": "Remove broken tracks",
+    "Check all Deezer tracks and remove those without a playable preview?": "Check all Deezer tracks and remove those without a playable preview?",
+    ":count tracks queued for verification. The cleanup continues in the background.": ":count tracks queued for verification. The cleanup continues in the background.",
+    "Delete FR tracks": "Delete FR tracks",
+    "Permanently delete every track assigned to the FR category?": "Permanently delete every track assigned to the FR category?",
+    ":count FR track(s) deleted.": ":count FR track(s) deleted."
 }

@@ -20,6 +20,8 @@ const page = usePage();
 const search = ref(props.filters.search ?? '');
 const perPage = ref(Number(props.filters.per_page ?? 25));
 const categoryId = ref(props.filters.category_id ?? '');
+const cleanupProcessing = ref(false);
+const frCleanupProcessing = ref(false);
 let searchTimer;
 
 const loadTracks = () => {
@@ -48,6 +50,26 @@ const removeTrack = (trackId) => {
         router.delete(route('admin.tracks.destroy', trackId), { preserveScroll: true });
     }
 };
+
+const removeBrokenTracks = () => {
+    if (!confirm(trans('Check all Deezer tracks and remove those without a playable preview?'))) return;
+
+    cleanupProcessing.value = true;
+    router.delete(route('admin.tracks.destroy-broken'), {
+        preserveScroll: true,
+        onFinish: () => { cleanupProcessing.value = false; },
+    });
+};
+
+const removeFrenchTracks = () => {
+    if (!confirm(trans('Permanently delete every track assigned to the FR category?'))) return;
+
+    frCleanupProcessing.value = true;
+    router.delete(route('admin.tracks.destroy-fr-category'), {
+        preserveScroll: true,
+        onFinish: () => { frCleanupProcessing.value = false; },
+    });
+};
 </script>
 
 <template>
@@ -58,7 +80,11 @@ const removeTrack = (trackId) => {
                     <h2 class="text-xl font-black text-slate-900 dark:text-white">{{ $t('Music library') }}</h2>
                     <p class="mt-1 text-sm font-bold text-slate-400">{{ $t(':count tracks in the library', { count: tracks.total }) }}</p>
                 </div>
-                <Link :href="route('admin.tracks.import.create')"><PrimaryButton>{{ $t('Import tracks') }}</PrimaryButton></Link>
+                <div class="flex flex-wrap gap-2">
+                    <DangerButton :disabled="frCleanupProcessing" @click="removeFrenchTracks">{{ $t('Delete FR tracks') }}</DangerButton>
+                    <DangerButton :disabled="cleanupProcessing" @click="removeBrokenTracks">{{ $t('Remove broken tracks') }}</DangerButton>
+                    <Link :href="route('admin.tracks.import.create')"><PrimaryButton>{{ $t('Import tracks') }}</PrimaryButton></Link>
+                </div>
             </div>
             <AdminTabs />
         </template>
@@ -66,6 +92,12 @@ const removeTrack = (trackId) => {
         <div class="mx-auto max-w-7xl space-y-5 px-4 py-8 sm:px-6 lg:px-8">
             <div v-if="page.props.flash?.imported !== undefined" class="rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
                 {{ $t(':imported of :total track(s) imported.', { imported: page.props.flash.imported, total: page.props.flash.total }) }}
+            </div>
+            <div v-if="page.props.flash?.broken_tracks_scan_queued !== undefined" class="rounded-2xl bg-violet-50 px-4 py-3 text-sm font-bold text-violet-700 dark:bg-violet-500/10 dark:text-violet-300">
+                {{ $t(':count tracks queued for verification. The cleanup continues in the background.', { count: page.props.flash.broken_tracks_scan_queued }) }}
+            </div>
+            <div v-if="page.props.flash?.fr_tracks_deleted !== undefined" class="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">
+                {{ $t(':count FR track(s) deleted.', { count: page.props.flash.fr_tracks_deleted }) }}
             </div>
 
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center">

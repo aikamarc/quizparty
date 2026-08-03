@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 
 class DeezerClient
@@ -43,12 +44,29 @@ class DeezerClient
     // it's actually needed (e.g. when a round starts) rather than trusting a stored value.
     public function fetchPreviewUrl(string $sourceId): ?string
     {
-        $response = Http::get("https://api.deezer.com/track/{$sourceId}");
+        $status = $this->inspectPreview($sourceId);
 
-        if (! $response->ok()) {
+        return is_string($status) ? $status : null;
+    }
+
+    /**
+     * Return the fresh URL, false when Deezer confirms there is no preview, or
+     * null when the track could not safely be checked due to a temporary error.
+     */
+    public function inspectPreview(string $sourceId): string|false|null
+    {
+        try {
+            $response = Http::connectTimeout(5)
+                ->timeout(10)
+                ->get("https://api.deezer.com/track/{$sourceId}");
+        } catch (ConnectionException) {
             return null;
         }
 
-        return $response->json('preview') ?: null;
+        if (! $response->ok() || $response->json('error')) {
+            return null;
+        }
+
+        return $response->json('preview') ?: false;
     }
 }

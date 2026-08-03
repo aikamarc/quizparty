@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\RemoveBrokenTracks;
 use App\Models\Category;
 use App\Models\Track;
 use Illuminate\Http\RedirectResponse;
@@ -81,6 +82,32 @@ class TrackController extends Controller
         $track->delete();
 
         return back();
+    }
+
+    public function destroyBroken(): RedirectResponse
+    {
+        $queued = 0;
+
+        Track::where('source', 'deezer')
+            ->whereNotNull('source_id')
+            ->select('id')
+            ->chunkById(25, function ($tracks) use (&$queued) {
+                RemoveBrokenTracks::dispatch($tracks->pluck('id')->all());
+                $queued += $tracks->count();
+            });
+
+        return back()->with('flash', ['broken_tracks_scan_queued' => $queued]);
+    }
+
+    public function destroyFrenchCategoryTracks(): RedirectResponse
+    {
+        $categoryIds = Category::where('name', 'FR')->pluck('id');
+
+        $deleted = $categoryIds->isEmpty()
+            ? 0
+            : Track::whereHas('categories', fn ($query) => $query->whereIn('categories.id', $categoryIds))->delete();
+
+        return back()->with('flash', ['fr_tracks_deleted' => $deleted]);
     }
 
     public function tempmarc()

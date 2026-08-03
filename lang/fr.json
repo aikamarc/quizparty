@@ -317,5 +317,12 @@
     "Use the format: answer to find - track title.": "Utilisez le format : réponse à trouver - titre du morceau.",
     "Answer to find": "Réponse à trouver",
     "Expected answer": "Réponse attendue",
-    "Use the format: answer - track title - artist (optional).": "Utilisez le format : réponse - titre du morceau - artiste (facultatif)."
+    "Use the format: answer - track title - artist (optional).": "Utilisez le format : réponse - titre du morceau - artiste (facultatif).",
+    "The audio preview could not be loaded. Please refresh the page and try again.": "L’extrait audio n’a pas pu être chargé. Actualisez la page puis réessayez.",
+    "Remove broken tracks": "Supprimer les morceaux invalides",
+    "Check all Deezer tracks and remove those without a playable preview?": "Vérifier tous les morceaux Deezer et supprimer ceux qui ne possèdent aucun extrait lisible ?",
+    ":count tracks queued for verification. The cleanup continues in the background.": ":count morceaux ont été placés dans la file de vérification. Le nettoyage continue en arrière-plan.",
+    "Delete FR tracks": "Supprimer les morceaux FR",
+    "Permanently delete every track assigned to the FR category?": "Supprimer définitivement tous les morceaux associés à la catégorie FR ?",
+    ":count FR track(s) deleted.": ":count morceau(x) FR supprimé(s)."
 }

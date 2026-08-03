@@ -81,6 +81,8 @@ Route::middleware([
     'can:admin',
 ])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/tracks', [TrackController::class, 'index'])->name('tracks.index');
+    Route::delete('/tracks/broken', [TrackController::class, 'destroyBroken'])->name('tracks.destroy-broken');
+    Route::delete('/tracks/category/fr', [TrackController::class, 'destroyFrenchCategoryTracks'])->name('tracks.destroy-fr-category');
     Route::delete('/tracks/{track}', [TrackController::class, 'destroy'])->name('tracks.destroy');
 
     Route::get('/tracks/import', [TrackImportController::class, 'create'])->name('tracks.import.create');

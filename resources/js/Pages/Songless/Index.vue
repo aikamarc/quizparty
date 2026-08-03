@@ -40,6 +40,7 @@ const suggestionsLoading = ref(false);
 const activeSuggestionIndex = ref(-1);
 const audio = ref(null);
 const playing = ref(false);
+const playbackError = ref(false);
 const playbackElapsed = ref(0);
 const processing = ref(false);
 const resetting = ref(false);
@@ -76,6 +77,7 @@ const updatePlaybackProgress = () => {
 const playClip = async () => {
     if (!audio.value || playing.value) return;
     stopAudio();
+    playbackError.value = false;
     playing.value = true;
     try {
         audio.value.currentTime = 0;
@@ -85,7 +87,13 @@ const playClip = async () => {
         stopTimer = setTimeout(stopAudio, actualPlaybackDuration.value * 1000);
     } catch {
         playing.value = false;
+        playbackError.value = true;
     }
+};
+
+const handleAudioError = () => {
+    stopAudio();
+    playbackError.value = true;
 };
 
 const postAction = (routeName, data = {}) => {
@@ -180,6 +188,7 @@ const resetToday = () => {
 
 watch(() => activeSong.value?.id, () => {
     stopAudio();
+    playbackError.value = false;
     guess.value = '';
     selectedTrack.value = null;
     suggestions.value = [];
@@ -230,11 +239,12 @@ onUnmounted(() => { stopAudio(); clearTimeout(suggestionTimer); });
                     <h2 class="mt-2 max-w-lg text-2xl font-black tracking-tight text-slate-950 dark:text-white">{{ categories }}</h2>
 
                     <div class="mt-9 flex flex-col items-center">
-                        <audio ref="audio" :src="activeSong.preview_url" preload="auto" class="hidden" @ended="stopAudio" />
+                        <audio ref="audio" :src="activeSong.preview_url" preload="auto" class="hidden" @ended="stopAudio" @error="handleAudioError" />
                         <button type="button" class="flex size-28 items-center justify-center rounded-[2rem] bg-violet-600 text-white shadow-[0_7px_0_#5b21b6] transition hover:-translate-y-0.5 hover:bg-violet-500 active:translate-y-1 active:shadow-none" :aria-label="$t('Listen to :duration seconds', { duration: currentDuration })" @click="playing ? stopAudio() : playClip()">
                             <HugeiconsIcon :icon="playing ? PauseIcon : PlayIcon" :size="38" />
                         </button>
                         <div class="mt-6 text-center"><div class="text-4xl font-black tracking-[-.04em] text-slate-950 dark:text-white">{{ currentDuration }}s</div><p class="qp-muted mt-1">{{ $t('Maximum listening time') }}</p></div>
+                        <p v-if="playbackError" class="mt-4 max-w-sm text-center text-sm font-bold text-rose-500 dark:text-rose-300">{{ $t('The audio preview could not be loaded. Please refresh the page and try again.') }}</p>
                     </div>
 
                     <div class="mt-9" :aria-label="$t('Listening progress')">

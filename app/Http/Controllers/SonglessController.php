@@ -7,6 +7,7 @@ use App\Models\Songless\DailySong;
 use App\Models\Track;
 use App\Services\Songless\DailyChallenge;
 use App\Services\Songless\GuessJudge;
+use App\Services\DeezerClient;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,7 +18,7 @@ use Inertia\Response;
 
 class SonglessController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request, DeezerClient $deezer): Response
     {
         $songs = DailyChallenge::forToday();
         $available = $songs->count() === 3;
@@ -32,6 +33,15 @@ class SonglessController extends Controller
 
             return ! $attempt || ! $attempt->isComplete();
         })?->position;
+
+        $activeTrack = $songs->firstWhere('position', $activePosition)?->track;
+        if ($activeTrack?->source === 'deezer' && filled($activeTrack->source_id)) {
+            $freshPreviewUrl = $deezer->fetchPreviewUrl($activeTrack->source_id);
+
+            if ($freshPreviewUrl) {
+                $activeTrack->update(['preview_url' => $freshPreviewUrl]);
+            }
+        }
 
         return Inertia::render('Songless/Index', [
             'date' => today()->toDateString(),
