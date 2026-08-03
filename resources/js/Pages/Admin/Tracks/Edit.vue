@@ -12,11 +12,16 @@ const props = defineProps({
 
 const selectedCategoryIds = ref(props.track.categories.map((category) => category.id));
 
-const form = useForm({});
+const form = useForm({
+    answer_mode: props.track.answer_mode ?? 'artist_title',
+    custom_answer: props.track.custom_answer ?? '',
+});
 
 const submit = () => {
     form.transform(() => ({
         category_ids: selectedCategoryIds.value,
+        answer_mode: form.answer_mode,
+        custom_answer: form.answer_mode === 'title_only' ? form.custom_answer : null,
     })).put(route('admin.tracks.update', props.track.id));
 };
 </script>
@@ -42,6 +47,12 @@ const submit = () => {
                     <div class="text-sm text-gray-500 dark:text-gray-400">{{ track.artist }}</div>
                     <audio :src="track.preview_url" controls class="mt-2 h-9" />
                 </div>
+            </div>
+
+            <div class="overflow-hidden bg-white p-6 shadow sm:rounded-lg dark:bg-gray-800">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ $t('Expected answer') }}</h3>
+                <div class="mt-4 grid gap-3 sm:grid-cols-2"><label class="rounded-2xl border p-4"><input v-model="form.answer_mode" type="radio" value="artist_title" class="me-2 text-violet-600"><span class="font-black">{{ $t('Artist and title') }}</span></label><label class="rounded-2xl border p-4"><input v-model="form.answer_mode" type="radio" value="title_only" class="me-2 text-violet-600"><span class="font-black">{{ $t('Custom answer only') }}</span></label></div>
+                <label v-if="form.answer_mode === 'title_only'" class="mt-4 block text-sm font-black">{{ $t('Answer to find') }}<input v-model="form.custom_answer" required class="mt-2 block w-full rounded-2xl border-gray-200 px-4 py-3 dark:border-white/10 dark:bg-white/5"><span v-if="form.errors.custom_answer" class="mt-1 block text-xs text-rose-500">{{ form.errors.custom_answer }}</span></label>
             </div>
 
             <div class="overflow-hidden bg-white p-6 shadow sm:rounded-lg dark:bg-gray-800">

@@ -212,8 +212,8 @@ const toggleMicrophone = () => {
 
         <div v-else class="flex flex-col items-center gap-3 text-center">
             <img v-if="round.revealed.track.cover_url" :src="round.revealed.track.cover_url" :alt="round.revealed.track.title" class="size-32 -rotate-2 rounded-[1.5rem] object-cover shadow-xl ring-4 ring-violet-100 dark:ring-violet-500/20">
-            <p class="text-xl font-bold text-gray-900 dark:text-white">{{ round.revealed.track.title }}</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">{{ round.revealed.track.artist }}</p>
+            <p class="text-xl font-bold text-gray-900 dark:text-white">{{ round.revealed.track.answer_mode === 'title_only' ? round.revealed.track.answer : round.revealed.track.title }}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ round.revealed.track.answer_mode === 'title_only' ? `${round.revealed.track.artist} — ${round.revealed.track.title}` : round.revealed.track.artist }}</p>
             <p class="text-xs text-gray-400 dark:text-gray-500">{{ $t('Next song coming up…') }}</p>
         </div>
 

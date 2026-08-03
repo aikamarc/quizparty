@@ -309,5 +309,12 @@
     "Filter by category": "Filter by category",
     "All categories": "All categories",
     "No tracks match your filters.": "No tracks match your filters.",
-    ":count tracks": ":count tracks"
+    ":count tracks": ":count tracks",
+    "Artist and title": "Artist and title",
+    "Players must find the artist and the song title.": "Players must find the artist and the song title.",
+    "Custom answer only": "Custom answer only",
+    "Use the format: answer to find - track title.": "Use the format: answer to find - track title.",
+    "Answer to find": "Answer to find",
+    "Expected answer": "Expected answer",
+    "Use the format: answer - track title - artist (optional).": "Use the format: answer - track title - artist (optional)."
 }

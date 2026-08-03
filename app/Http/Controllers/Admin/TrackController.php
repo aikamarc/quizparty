@@ -63,8 +63,14 @@ class TrackController extends Controller
         $validated = $request->validate([
             'category_ids' => ['array'],
             'category_ids.*' => ['integer', 'exists:categories,id'],
+            'answer_mode' => ['required', 'in:artist_title,title_only'],
+            'custom_answer' => ['nullable', 'required_if:answer_mode,title_only', 'string', 'max:255'],
         ]);
 
+        $track->update([
+            'answer_mode' => $validated['answer_mode'],
+            'custom_answer' => $validated['answer_mode'] === 'title_only' ? $validated['custom_answer'] : null,
+        ]);
         $track->categories()->sync($validated['category_ids'] ?? []);
 
         return redirect()->route('admin.tracks.index');

@@ -45,6 +45,8 @@ class RoundEnded implements ShouldBroadcastNow
             'track' => [
                 'title' => $this->round->track->title,
                 'artist' => $this->round->track->artist,
+                'answer_mode' => $this->round->track->answer_mode,
+                'answer' => $this->round->track->custom_answer ?: $this->round->track->title,
                 'cover_url' => $this->round->track->cover_url,
             ],
             'artist_found_by' => $this->round->artistFoundBy?->only('id', 'name'),

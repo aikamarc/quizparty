@@ -7,6 +7,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 
 const form = useForm({
     list: '',
+    answer_mode: 'artist_title',
 });
 
 const submit = () => {
@@ -30,6 +31,10 @@ const submit = () => {
                 </p>
 
                 <form class="mt-6" @submit.prevent="submit">
+                    <div class="mb-6 grid gap-3 sm:grid-cols-2">
+                        <label class="cursor-pointer rounded-2xl border p-4" :class="form.answer_mode === 'artist_title' ? 'border-violet-500 bg-violet-50 dark:bg-violet-500/10' : 'border-gray-200 dark:border-gray-700'"><input v-model="form.answer_mode" type="radio" value="artist_title" class="me-2 text-violet-600"><span class="font-black">{{ $t('Artist and title') }}</span><p class="mt-1 text-xs text-gray-500">{{ $t('Players must find the artist and the song title.') }}</p></label>
+                        <label class="cursor-pointer rounded-2xl border p-4" :class="form.answer_mode === 'title_only' ? 'border-violet-500 bg-violet-50 dark:bg-violet-500/10' : 'border-gray-200 dark:border-gray-700'"><input v-model="form.answer_mode" type="radio" value="title_only" class="me-2 text-violet-600"><span class="font-black">{{ $t('Custom answer only') }}</span><p class="mt-1 text-xs text-gray-500">{{ $t('Use the format: answer - track title - artist (optional).') }}</p></label>
+                    </div>
                     <InputLabel for="list" :value="$t('Track list')" />
                     <textarea
                         id="list"
@@ -37,7 +42,7 @@ const submit = () => {
                         rows="10"
                         required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
-                        placeholder="Daft Punk - One More Time&#10;Queen - Bohemian Rhapsody&#10;..."
+                        :placeholder="form.answer_mode === 'title_only' ? 'Toy Story - You’ve Got a Friend in Me - Randy Newman\nToy Story - You’ve Got a Friend in Me' : 'Daft Punk - One More Time\nQueen - Bohemian Rhapsody'"
                     />
                     <InputError :message="form.errors.list" class="mt-2" />
 

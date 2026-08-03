@@ -23,17 +23,38 @@ class TrackImportController extends Controller
     {
         $request->validate([
             'list' => ['required', 'string'],
+            'answer_mode' => ['required', 'in:artist_title,title_only'],
         ]);
+
+        $answerMode = $request->string('answer_mode')->toString();
 
         $lines = collect(explode("\n", $request->string('list')))
             ->map(fn ($line) => trim($line))
             ->filter()
             ->values();
 
-        $results = $lines->map(fn (string $line) => [
-            'input' => $line,
-            'match' => $deezer->search($line),
-        ]);
+        $results = $lines->map(function (string $line) use ($answerMode, $deezer) {
+            $parts = $answerMode === 'title_only'
+                ? preg_split('/\s+(?:-|–|—)\s+/u', $line, 3)
+                : [];
+            $parts = collect($parts)->map(fn ($part) => trim($part, " \t\n\r\0\x0B*_"))->all();
+            $answer = $parts[0] ?? null;
+            $title = $parts[1] ?? null;
+            $artist = $parts[2] ?? null;
+
+            // Exclude the expected answer from the Deezer query. Otherwise a
+            // franchise name such as "Toy Story" can skew the search results.
+            $search = filled($title)
+                ? 'track:"'.addcslashes($title, '"').'"'.(filled($artist) ? ' artist:"'.addcslashes($artist, '"').'"' : '')
+                : $line;
+
+            return [
+                'input' => $line,
+                'answer_mode' => $answerMode,
+                'custom_answer' => $answerMode === 'title_only' ? trim((string) $answer) : null,
+                'match' => $deezer->search(trim((string) $search)),
+            ];
+        });
 
         return Inertia::render('Admin/Tracks/ImportPreview', [
             'results' => $results,
@@ -48,6 +69,8 @@ class TrackImportController extends Controller
             'tracks.*.source_id' => ['required', 'string'],
             'tracks.*.title' => ['required', 'string'],
             'tracks.*.artist' => ['required', 'string'],
+            'tracks.*.answer_mode' => ['required', 'in:artist_title,title_only'],
+            'tracks.*.custom_answer' => ['nullable', 'required_if:tracks.*.answer_mode,title_only', 'string', 'max:255'],
             'tracks.*.album' => ['nullable', 'string'],
             'tracks.*.cover_url' => ['nullable', 'string'],
             'tracks.*.preview_url' => ['required', 'string'],
@@ -65,6 +88,8 @@ class TrackImportController extends Controller
                 [
                     'title' => $track['title'],
                     'artist' => $track['artist'],
+                    'answer_mode' => $track['answer_mode'],
+                    'custom_answer' => $track['custom_answer'] ?? null,
                     'album' => $track['album'] ?? null,
                     'cover_url' => $track['cover_url'] ?? null,
                     'preview_url' => $track['preview_url'],
@@ -72,6 +97,13 @@ class TrackImportController extends Controller
                     'added_by' => $request->user()->id,
                 ]
             );
+
+            if (! $created->wasRecentlyCreated) {
+                $created->update([
+                    'answer_mode' => $track['answer_mode'],
+                    'custom_answer' => $track['custom_answer'] ?? null,
+                ]);
+            }
 
             if ($categoryIds) {
                 $created->categories()->syncWithoutDetaching($categoryIds);

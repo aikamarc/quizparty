@@ -146,7 +146,11 @@ class RoomController extends Controller
                 'lives_remaining' => $playerState?->lives_remaining,
                 'disqualified' => $playerState?->disqualified ?? false,
                 'revealed' => $round->revealed_at !== null,
-                'track' => $round->revealed_at !== null ? $round->track->only('title', 'artist', 'cover_url') : null,
+                'track' => $round->revealed_at !== null ? [
+                    ...$round->track->only('title', 'artist', 'cover_url'),
+                    'answer_mode' => $round->track->answer_mode,
+                    'answer' => $round->track->custom_answer ?: $round->track->title,
+                ] : null,
                 'artist_found' => $round->artist_found_by ? ['value' => $round->track->artist, 'found_by' => $round->artistFoundBy->only('id', 'name')] : null,
                 'title_found' => $round->title_found_by ? ['value' => $round->track->title, 'found_by' => $round->titleFoundBy->only('id', 'name')] : null,
             ];
@@ -265,7 +269,11 @@ class RoomController extends Controller
                 'lives_remaining' => $playerState->lives_remaining,
                 'disqualified' => $playerState->disqualified,
                 'revealed' => $round->revealed_at !== null,
-                'track' => $round->revealed_at !== null ? $round->track->only('title', 'artist', 'cover_url') : null,
+                'track' => $round->revealed_at !== null ? [
+                    ...$round->track->only('title', 'artist', 'cover_url'),
+                    'answer_mode' => $round->track->answer_mode,
+                    'answer' => $round->track->custom_answer ?: $round->track->title,
+                ] : null,
                 // Exposed as soon as found (not only on full reveal) so everyone sees
                 // a correct artist/title guess live, before the round timer ends.
                 'artist_found' => $round->artist_found_by ? ['value' => $round->track->artist, 'found_by' => $round->artistFoundBy->only('id', 'name')] : null,

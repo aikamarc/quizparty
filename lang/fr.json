@@ -310,5 +310,12 @@
     "Filter by category": "Filtrer par catégorie",
     "All categories": "Toutes les catégories",
     "No tracks match your filters.": "Aucun morceau ne correspond aux filtres.",
-    ":count tracks": ":count morceaux"
+    ":count tracks": ":count morceaux",
+    "Artist and title": "Artiste et titre",
+    "Players must find the artist and the song title.": "Les joueurs doivent trouver l’artiste et le titre du morceau.",
+    "Custom answer only": "Réponse personnalisée uniquement",
+    "Use the format: answer to find - track title.": "Utilisez le format : réponse à trouver - titre du morceau.",
+    "Answer to find": "Réponse à trouver",
+    "Expected answer": "Réponse attendue",
+    "Use the format: answer - track title - artist (optional).": "Utilisez le format : réponse - titre du morceau - artiste (facultatif)."
 }

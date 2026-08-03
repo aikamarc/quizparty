@@ -11,6 +11,8 @@ class Track extends Model
     protected $fillable = [
         'title',
         'artist',
+        'answer_mode',
+        'custom_answer',
         'album',
         'cover_url',
         'preview_url',

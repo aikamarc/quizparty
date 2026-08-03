@@ -50,8 +50,12 @@ class GuessController extends Controller
 
         $foundArtist = false;
         $foundTitle = false;
-        $matchesArtist = GuessChecker::matches($guess, $round->track->artist);
-        $matchesTitle = GuessChecker::matches($guess, $round->track->title);
+        $titleAnswer = $round->track->answer_mode === 'title_only'
+            ? ($round->track->custom_answer ?: $round->track->title)
+            : $round->track->title;
+        $matchesArtist = $round->track->answer_mode === 'artist_title'
+            && GuessChecker::matches($guess, $round->track->artist);
+        $matchesTitle = GuessChecker::matches($guess, $titleAnswer);
 
         if ($round->artist_found_by === null && $matchesArtist) {
             $round->update(['artist_found_by' => $user->id, 'artist_found_at' => now()]);
@@ -63,11 +67,12 @@ class GuessController extends Controller
         if ($round->title_found_by === null && $matchesTitle) {
             $round->update(['title_found_by' => $user->id, 'title_found_at' => now()]);
             $room->players()->where('user_id', $user->id)->increment('score');
-            SafeBroadcast::send(new GuessRevealed($round, 'title', $round->track->title, $user));
+            SafeBroadcast::send(new GuessRevealed($round, 'title', $titleAnswer, $user));
             $foundTitle = true;
         }
 
-        if ($round->isFullyFound()) {
+        if (($round->track->answer_mode === 'title_only' && $round->title_found_by !== null)
+            || ($round->track->answer_mode === 'artist_title' && $round->isFullyFound())) {
             RoundManager::endRound($round);
         }
 
@@ -80,7 +85,7 @@ class GuessController extends Controller
             'found_artist' => $foundArtist,
             'found_title' => $foundTitle,
             'artist' => $foundArtist ? $round->track->artist : null,
-            'title' => $foundTitle ? $round->track->title : null,
+            'title' => $foundTitle ? $titleAnswer : null,
             'wrong' => $wrong,
             'lives_remaining' => $playerState->lives_remaining,
             'disqualified' => $playerState->disqualified,
