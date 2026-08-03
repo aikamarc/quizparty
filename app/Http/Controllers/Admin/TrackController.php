@@ -17,6 +17,10 @@ class TrackController extends Controller
     {
         $search = trim((string) $request->query('search'));
         $perPage = min(100, max(10, $request->integer('per_page', 25)));
+        $category = Category::with('children:id,parent_id')->find($request->integer('category_id'));
+        $categoryIds = $category
+            ? collect([$category->id])->merge($category->children->pluck('id'))
+            : collect();
 
         $tracks = Track::query()
             ->select(['id', 'title', 'artist', 'album', 'cover_url', 'preview_url', 'duration_seconds'])
@@ -28,6 +32,9 @@ class TrackController extends Controller
                         ->orWhere('album', 'like', '%'.$search.'%');
                 });
             })
+            ->when($categoryIds->isNotEmpty(), function ($query) use ($categoryIds) {
+                $query->whereHas('categories', fn ($query) => $query->whereIn('categories.id', $categoryIds));
+            })
             ->orderByDesc('id')
             ->paginate($perPage)
             ->withQueryString();
@@ -37,7 +44,9 @@ class TrackController extends Controller
             'filters' => [
                 'search' => $search,
                 'per_page' => $perPage,
+                'category_id' => $category?->id,
             ],
+            'categories' => Category::whereNull('parent_id')->with('children:id,name,parent_id')->orderBy('name')->get(['id', 'name']),
         ]);
     }
 

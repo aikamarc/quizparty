@@ -63,7 +63,7 @@ const toggleChild = (child, category) => {
                 <img v-if="category.image_url" :src="category.image_url" alt="" class="absolute inset-0 size-full scale-105 object-cover blur-[2px] transition duration-500 group-hover:scale-110">
                 <span class="absolute inset-0 bg-violet-950/45 backdrop-blur-[1px] transition group-hover:bg-violet-950/35" />
                 <span v-if="isCategoryActive(category)" class="pointer-events-none absolute inset-2 rounded-2xl ring-3 ring-inset ring-emerald-400" />
-                <span class="relative z-10 text-2xl font-black tracking-tight drop-shadow-lg">{{ category.name }}</span>
+                <span class="relative z-10"><span class="block text-2xl font-black tracking-tight drop-shadow-lg">{{ category.name }}</span><span class="mt-1 block text-xs font-black text-white/75">{{ $t(':count tracks', { count: category.total_tracks_count }) }}</span></span>
                 <span class="absolute right-4 top-4 z-10 flex size-8 items-center justify-center rounded-full border-2 border-white/70 bg-black/30 shadow-lg transition" :class="isCategoryActive(category) ? 'border-emerald-300 bg-emerald-500' : ''">
                     <HugeiconsIcon v-if="isCategoryActive(category)" :icon="Tick02Icon" :size="19" class="text-white" :stroke-width="3" />
                 </span>
@@ -80,7 +80,7 @@ const toggleChild = (child, category) => {
                         : 'text-slate-500 hover:bg-violet-50/70 dark:text-slate-300 dark:hover:bg-white/5'"
                     @click="toggleChild(child, category)"
                 >
-                    <span>{{ child.name }}</span>
+                    <span class="flex min-w-0 items-center gap-2"><span class="truncate">{{ child.name }}</span><span class="shrink-0 text-[10px] font-black text-slate-400">{{ $t(':count tracks', { count: child.tracks_count }) }}</span></span>
                     <span class="relative h-6 w-11 shrink-0 rounded-full transition" :class="isChildSelected(child) ? 'bg-violet-600' : 'bg-slate-200 dark:bg-slate-700'">
                         <span class="absolute top-1 size-4 rounded-full bg-white shadow transition-all" :class="isChildSelected(child) ? 'left-6' : 'left-1'" />
                     </span>

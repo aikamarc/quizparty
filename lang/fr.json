@@ -306,5 +306,9 @@
     "Answer with microphone": "Répondre avec le microphone",
     "Voice recognition is not supported by this browser.": "La reconnaissance vocale n’est pas prise en charge par ce navigateur.",
     "Listening… Speak now.": "Écoute en cours… Parlez maintenant.",
-    "Microphone access was denied or unavailable.": "L’accès au microphone a été refusé ou est indisponible."
+    "Microphone access was denied or unavailable.": "L’accès au microphone a été refusé ou est indisponible.",
+    "Filter by category": "Filtrer par catégorie",
+    "All categories": "Toutes les catégories",
+    "No tracks match your filters.": "Aucun morceau ne correspond aux filtres.",
+    ":count tracks": ":count morceaux"
 }

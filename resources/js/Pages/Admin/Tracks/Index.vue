@@ -13,17 +13,20 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 const props = defineProps({
     tracks: { type: Object, required: true },
     filters: { type: Object, required: true },
+    categories: { type: Array, required: true },
 });
 
 const page = usePage();
 const search = ref(props.filters.search ?? '');
 const perPage = ref(Number(props.filters.per_page ?? 25));
+const categoryId = ref(props.filters.category_id ?? '');
 let searchTimer;
 
 const loadTracks = () => {
     router.get(route('admin.tracks.index'), {
         search: search.value || undefined,
         per_page: perPage.value,
+        category_id: categoryId.value || undefined,
     }, {
         preserveState: true,
         preserveScroll: true,
@@ -37,6 +40,7 @@ watch(search, () => {
     searchTimer = setTimeout(loadTracks, 300);
 });
 watch(perPage, loadTracks);
+watch(categoryId, loadTracks);
 onUnmounted(() => clearTimeout(searchTimer));
 
 const removeTrack = (trackId) => {
@@ -64,12 +68,13 @@ const removeTrack = (trackId) => {
                 {{ $t(':imported of :total track(s) imported.', { imported: page.props.flash.imported, total: page.props.flash.total }) }}
             </div>
 
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <label class="relative block w-full sm:max-w-md">
                     <span class="sr-only">{{ $t('Search tracks') }}</span>
                     <HugeiconsIcon :icon="Search01Icon" :size="20" class="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input v-model="search" type="search" class="w-full rounded-2xl border-violet-200 bg-white/80 py-3 pe-4 ps-12 text-sm font-bold shadow-sm focus:border-violet-500 focus:ring-violet-500 dark:border-white/10 dark:bg-white/5" :placeholder="$t('Search by title, artist or album')">
                 </label>
+                <label class="block sm:min-w-56"><span class="sr-only">{{ $t('Filter by category') }}</span><select v-model="categoryId" class="w-full rounded-2xl border-violet-200 bg-white/80 py-3 text-sm font-black text-slate-600 focus:border-violet-500 focus:ring-violet-500 dark:border-white/10 dark:bg-[#171329] dark:text-slate-200"><option value="">{{ $t('All categories') }}</option><template v-for="category in categories" :key="category.id"><option :value="category.id">{{ category.name }}</option><option v-for="child in category.children" :key="child.id" :value="child.id">— {{ child.name }}</option></template></select></label>
                 <label class="flex items-center gap-2 text-sm font-bold text-slate-500 dark:text-slate-300">
                     {{ $t('Rows per page') }}
                     <select v-model="perPage" class="rounded-xl border-violet-200 bg-white py-2 text-sm font-black focus:border-violet-500 focus:ring-violet-500 dark:border-white/10 dark:bg-[#171329]">
@@ -92,7 +97,7 @@ const removeTrack = (trackId) => {
                                 <td class="px-5 py-3"><audio :src="track.preview_url" controls preload="none" class="h-8 w-48" /></td>
                                 <td class="px-5 py-3"><div class="flex justify-end gap-2"><Link :href="route('admin.tracks.edit', track.id)"><SecondaryButton>{{ $t('Edit') }}</SecondaryButton></Link><DangerButton @click="removeTrack(track.id)">{{ $t('Remove') }}</DangerButton></div></td>
                             </tr>
-                            <tr v-if="!tracks.data.length"><td colspan="5" class="px-6 py-14 text-center text-sm font-bold text-slate-400">{{ search ? $t('No tracks match your search.') : $t('No tracks yet.') }}</td></tr>
+                            <tr v-if="!tracks.data.length"><td colspan="5" class="px-6 py-14 text-center text-sm font-bold text-slate-400">{{ search || categoryId ? $t('No tracks match your filters.') : $t('No tracks yet.') }}</td></tr>
                         </tbody>
                     </table>
                 </div>

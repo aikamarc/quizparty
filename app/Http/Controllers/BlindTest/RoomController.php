@@ -86,6 +86,20 @@ class RoomController extends Controller
         RoundManager::tick($room);
         $room->refresh();
 
+        $categories = Category::whereNull('parent_id')
+            ->with(['children' => fn ($query) => $query->withCount('tracks')->orderBy('name')])
+            ->withCount('tracks')
+            ->orderBy('name')
+            ->get();
+
+        $categories->each(function (Category $category) {
+            $categoryIds = collect([$category->id])->merge($category->children->pluck('id'));
+            $category->setAttribute('total_tracks_count', Track::whereHas(
+                'categories',
+                fn ($query) => $query->whereIn('categories.id', $categoryIds),
+            )->count());
+        });
+
         $data = [
             'room' => [
                 'id' => $room->id,
@@ -104,7 +118,7 @@ class RoomController extends Controller
                 'score' => $player->score,
                 'user' => $player->user->only('id', 'name', 'profile_photo_url'),
             ]),
-            'categories' => Category::whereNull('parent_id')->with('children')->orderBy('name')->get(),
+            'categories' => $categories,
             'selectedCategoryIds' => $room->categories()->pluck('categories.id'),
         ];
 
