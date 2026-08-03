@@ -300,5 +300,10 @@
     "Public room": "Public room",
     "Anyone can discover and join this room.": "Anyone can discover and join this room.",
     "Save failed": "Save failed",
-    "The settings could not be saved. Please try again.": "The settings could not be saved. Please try again."
+    "The settings could not be saved. Please try again.": "The settings could not be saved. Please try again.",
+    "Stop listening": "Stop listening",
+    "Answer with microphone": "Answer with microphone",
+    "Voice recognition is not supported by this browser.": "Voice recognition is not supported by this browser.",
+    "Listening… Speak now.": "Listening… Speak now.",
+    "Microphone access was denied or unavailable.": "Microphone access was denied or unavailable."
 }

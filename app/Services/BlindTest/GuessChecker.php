@@ -8,6 +8,8 @@ class GuessChecker
 {
     public static function normalize(string $value): string
     {
+        // Edition metadata such as "(2005 Remaster)" is not part of the answer.
+        $value = preg_replace('/\([^)]*\)/u', ' ', $value);
         $value = Str::lower(Str::ascii($value));
         $value = str_replace('&', ' and ', $value);
         $value = preg_replace('/[^a-z0-9 ]+/', ' ', $value);

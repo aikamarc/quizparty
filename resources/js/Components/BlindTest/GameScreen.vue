@@ -15,10 +15,16 @@ const props = defineProps({
 const emit = defineEmits(['found']);
 
 const guess = ref('');
+const guessInput = ref(null);
 const audioEl = ref(null);
 const sending = ref(false);
 const isPlaying = ref(false);
 const audioBlocked = ref(false);
+const listening = ref(false);
+const microphoneError = ref(false);
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const microphoneSupported = Boolean(SpeechRecognition);
+let recognition = null;
 const volume = ref(Number(localStorage.getItem('blindtest-volume') ?? 1));
 const answerBlocked = computed(() => props.round.disqualified || props.round.livesRemaining < 1);
 let reportedRoundNumber = null;
@@ -39,6 +45,7 @@ onMounted(() => {
     window.addEventListener('pagehide', reportPageLeave);
 });
 onUnmounted(() => {
+    recognition?.abort();
     document.removeEventListener('visibilitychange', onVisibilityChange);
     window.removeEventListener('pagehide', reportPageLeave);
 });
@@ -65,14 +72,16 @@ const onVolumeChange = () => {
     localStorage.setItem('blindtest-volume', volume.value);
 };
 
-watch(() => props.round.previewUrl, () => {
+watch(() => props.round.roundNumber, () => {
     guess.value = '';
     audioBlocked.value = false;
+    recognition?.abort();
 
     // The <audio> template ref isn't bound yet during this component's very first
     // setup pass (the watch runs before mount), so wait a tick before touching it.
     nextTick(() => {
         attemptPlay();
+        guessInput.value?.focus();
     });
 }, { immediate: true });
 
@@ -101,6 +110,33 @@ const submitGuess = async () => {
     } finally {
         sending.value = false;
     }
+};
+
+const toggleMicrophone = () => {
+    if (!microphoneSupported || answerBlocked.value || props.round.revealed) return;
+
+    if (listening.value) {
+        recognition?.stop();
+        return;
+    }
+
+    microphoneError.value = false;
+    recognition = new SpeechRecognition();
+    recognition.lang = document.documentElement.lang?.startsWith('fr') ? 'fr-FR' : 'en-US';
+    recognition.interimResults = false;
+    recognition.continuous = false;
+    recognition.maxAlternatives = 1;
+    recognition.onstart = () => { listening.value = true; };
+    recognition.onend = () => { listening.value = false; };
+    recognition.onerror = () => {
+        listening.value = false;
+        microphoneError.value = true;
+    };
+    recognition.onresult = (event) => {
+        guess.value = event.results[0][0].transcript.trim();
+        nextTick(() => submitGuess());
+    };
+    recognition.start();
 };
 </script>
 
@@ -183,15 +219,21 @@ const submitGuess = async () => {
 
         <form class="flex w-full max-w-md gap-3" @submit.prevent="submitGuess">
             <TextInput
+                ref="guessInput"
                 v-model="guess"
                 :placeholder="$t('Artist, title, or both…')"
                 class="block w-full"
                 :disabled="!! round.revealed || answerBlocked"
                 autofocus
             />
+            <button type="button" class="inline-flex size-12 shrink-0 items-center justify-center rounded-2xl border-2 transition" :class="listening ? 'animate-pulse border-rose-400 bg-rose-500 text-white' : 'border-violet-200 bg-violet-50 text-violet-600 hover:border-violet-400 dark:border-white/10 dark:bg-white/5 dark:text-violet-300'" :disabled="!microphoneSupported || !!round.revealed || answerBlocked" :aria-label="listening ? $t('Stop listening') : $t('Answer with microphone')" :title="!microphoneSupported ? $t('Voice recognition is not supported by this browser.') : ''" @click="toggleMicrophone">
+                <HugeiconsIcon :icon="Mic01Icon" :size="22" />
+            </button>
             <PrimaryButton type="submit" :disabled="!! round.revealed || sending || answerBlocked">
                 {{ $t('Guess') }}
             </PrimaryButton>
         </form>
+        <p v-if="listening" class="-mt-3 text-xs font-black text-rose-500">{{ $t('Listening… Speak now.') }}</p>
+        <p v-else-if="microphoneError" class="-mt-3 text-xs font-bold text-amber-600 dark:text-amber-400">{{ $t('Microphone access was denied or unavailable.') }}</p>
     </div>
 </template>

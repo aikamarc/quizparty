@@ -301,5 +301,10 @@
     "Public room": "Salon public",
     "Anyone can discover and join this room.": "Tout le monde peut découvrir et rejoindre ce salon.",
     "Save failed": "Échec de l’enregistrement",
-    "The settings could not be saved. Please try again.": "Les paramètres n’ont pas pu être enregistrés. Veuillez réessayer."
+    "The settings could not be saved. Please try again.": "Les paramètres n’ont pas pu être enregistrés. Veuillez réessayer.",
+    "Stop listening": "Arrêter l’écoute",
+    "Answer with microphone": "Répondre avec le microphone",
+    "Voice recognition is not supported by this browser.": "La reconnaissance vocale n’est pas prise en charge par ce navigateur.",
+    "Listening… Speak now.": "Écoute en cours… Parlez maintenant.",
+    "Microphone access was denied or unavailable.": "L’accès au microphone a été refusé ou est indisponible."
 }

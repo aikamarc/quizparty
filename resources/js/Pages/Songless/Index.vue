@@ -50,12 +50,6 @@ let suggestionTimer;
 
 const currentDuration = computed(() => props.stages[activeSong.value?.stage ?? 0]);
 const actualPlaybackDuration = computed(() => activeSong.value?.stage === 0 ? 0.3 : currentDuration.value);
-const playbackStart = computed(() => {
-    const stage = activeSong.value?.stage ?? 0;
-    if (stage === 0) return 0;
-    if (stage === 1) return 0.3;
-    return props.stages[stage - 1];
-});
 const progressPercent = computed(() => Math.min(100, ((playing.value ? playbackElapsed.value : currentDuration.value) / 10) * 100));
 const categories = computed(() => activeSong.value?.categories.length
     ? activeSong.value.categories.join(' · ')
@@ -66,14 +60,14 @@ const stopAudio = () => {
     cancelAnimationFrame(progressFrame);
     if (audio.value) {
         audio.value.pause();
-        audio.value.currentTime = playbackStart.value;
+        audio.value.currentTime = 0;
     }
     playing.value = false;
-    playbackElapsed.value = playbackStart.value;
+    playbackElapsed.value = 0;
 };
 
 const updatePlaybackProgress = () => {
-    playbackElapsed.value = Math.min(actualPlaybackDuration.value, playbackStart.value + (performance.now() - playbackStartedAt) / 1000);
+    playbackElapsed.value = Math.min(actualPlaybackDuration.value, (performance.now() - playbackStartedAt) / 1000);
     if (playing.value && playbackElapsed.value < actualPlaybackDuration.value) {
         progressFrame = requestAnimationFrame(updatePlaybackProgress);
     }
@@ -84,11 +78,11 @@ const playClip = async () => {
     stopAudio();
     playing.value = true;
     try {
-        audio.value.currentTime = playbackStart.value;
+        audio.value.currentTime = 0;
         await audio.value.play();
         playbackStartedAt = performance.now();
         progressFrame = requestAnimationFrame(updatePlaybackProgress);
-        stopTimer = setTimeout(stopAudio, (actualPlaybackDuration.value - playbackStart.value) * 1000);
+        stopTimer = setTimeout(stopAudio, actualPlaybackDuration.value * 1000);
     } catch {
         playing.value = false;
     }
