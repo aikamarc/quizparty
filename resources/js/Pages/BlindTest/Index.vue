@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { router, Link } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -16,6 +16,9 @@ const joinByCode = () => {
     if (joinCode.value.trim()) router.post(route('blindtest.rooms.resolve-code'), { code: joinCode.value.trim().toUpperCase() });
 };
 const statusLabel = (status) => (status === 'lobby' ? trans('Waiting') : trans('In progress'));
+let roomsRefreshTimer;
+onMounted(() => { roomsRefreshTimer = setInterval(() => router.reload({ only: ['rooms', 'publicRooms'], preserveScroll: true }), 15000); });
+onUnmounted(() => clearInterval(roomsRefreshTimer));
 </script>
 
 <template>

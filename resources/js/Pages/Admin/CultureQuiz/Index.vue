@@ -1,0 +1,6 @@
+<script setup>
+import { Link, useForm } from '@inertiajs/vue3';
+import AppLayout from '@/Layouts/AppLayout.vue'; import AdminTabs from '@/Components/Admin/AdminTabs.vue'; import PrimaryButton from '@/Components/PrimaryButton.vue'; import TextInput from '@/Components/TextInput.vue';
+defineProps({categories:Array}); const form=useForm({name:''}); const submit=()=>form.post(route('admin.culture-quiz.categories.store'),{onSuccess:()=>form.reset()});
+</script>
+<template><AppLayout title="Culture Quiz · Admin"><template #header><h2 class="qp-title">Culture Quiz</h2><AdminTabs /></template><main class="qp-shell space-y-8 py-10"><form class="qp-card flex gap-3" @submit.prevent="submit"><TextInput v-model="form.name" required placeholder="Nouvelle catégorie" class="flex-1"/><PrimaryButton>Ajouter</PrimaryButton></form><section class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"><Link v-for="category in categories" :key="category.id" :href="route('admin.culture-quiz.categories.show',category.id)" class="qp-card transition hover:-translate-y-1"><div class="qp-kicker">Catégorie</div><h3 class="mt-2 text-xl font-black">{{category.name}}</h3><p class="qp-muted mt-2">{{category.questions_count}} questions</p></Link></section></main></AppLayout></template>

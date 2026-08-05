@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onUnmounted, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
 import { trans } from 'laravel-vue-i18n';
@@ -42,6 +42,7 @@ const audio = ref(null);
 const playing = ref(false);
 const playbackError = ref(false);
 const playbackElapsed = ref(0);
+const volume = ref(1);
 const processing = ref(false);
 const resetting = ref(false);
 let stopTimer;
@@ -95,6 +96,11 @@ const handleAudioError = () => {
     stopAudio();
     playbackError.value = true;
 };
+
+watch(volume, (value) => {
+    if (audio.value) audio.value.volume = value;
+    localStorage.setItem('songless-volume', String(value));
+});
 
 const postAction = (routeName, data = {}) => {
     if (!activeSong.value || processing.value) return;
@@ -193,6 +199,13 @@ watch(() => activeSong.value?.id, () => {
     selectedTrack.value = null;
     suggestions.value = [];
 });
+onMounted(() => {
+    const savedVolume = Number(localStorage.getItem('songless-volume'));
+    if (Number.isFinite(savedVolume) && savedVolume >= 0 && savedVolume <= 1) {
+        volume.value = savedVolume;
+    }
+    if (audio.value) audio.value.volume = volume.value;
+});
 onUnmounted(() => { stopAudio(); clearTimeout(suggestionTimer); });
 </script>
 
@@ -243,6 +256,10 @@ onUnmounted(() => { stopAudio(); clearTimeout(suggestionTimer); });
                         <button type="button" class="flex size-28 items-center justify-center rounded-[2rem] bg-violet-600 text-white shadow-[0_7px_0_#5b21b6] transition hover:-translate-y-0.5 hover:bg-violet-500 active:translate-y-1 active:shadow-none" :aria-label="$t('Listen to :duration seconds', { duration: currentDuration })" @click="playing ? stopAudio() : playClip()">
                             <HugeiconsIcon :icon="playing ? PauseIcon : PlayIcon" :size="38" />
                         </button>
+                        <label class="mt-6 w-full max-w-64 text-center">
+                            <span class="text-xs font-black uppercase tracking-wider text-slate-400">{{ $t('Volume') }} · {{ Math.round(volume * 100) }}%</span>
+                            <input v-model.number="volume" type="range" min="0" max="1" step="0.05" class="mt-2 h-2 w-full cursor-pointer accent-violet-600" :aria-label="$t('Volume')">
+                        </label>
                         <div class="mt-6 text-center"><div class="text-4xl font-black tracking-[-.04em] text-slate-950 dark:text-white">{{ currentDuration }}s</div><p class="qp-muted mt-1">{{ $t('Maximum listening time') }}</p></div>
                         <p v-if="playbackError" class="mt-4 max-w-sm text-center text-sm font-bold text-rose-500 dark:text-rose-300">{{ $t('The audio preview could not be loaded. Please refresh the page and try again.') }}</p>
                     </div>

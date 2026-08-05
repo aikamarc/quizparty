@@ -22,6 +22,7 @@ return [
         'color' => 'teal',
         'icon' => 'brain',
         'players' => 'multi',
-        'status' => 'coming_soon',
+        'status' => 'available',
+        'route' => 'culture-quiz.index',
     ],
 ];

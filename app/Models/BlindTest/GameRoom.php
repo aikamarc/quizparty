@@ -23,6 +23,7 @@ class GameRoom extends Model
         'current_round',
         'started_at',
         'host_last_seen_at',
+        'last_activity_at',
         'anti_cheat',
         'lives_per_round',
     ];
@@ -32,6 +33,7 @@ class GameRoom extends Model
         return [
             'started_at' => 'datetime',
             'host_last_seen_at' => 'datetime',
+            'last_activity_at' => 'datetime',
             'is_public' => 'boolean',
             'anti_cheat' => 'boolean',
         ];

@@ -8,4 +8,4 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('blindtest:cleanup-stale-rooms')->everyMinute();
+Schedule::command('games:cleanup-stale-rooms')->everyMinute();

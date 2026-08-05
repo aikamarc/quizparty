@@ -10,13 +10,14 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 const props = defineProps({
     results: { type: Array, required: true },
     categories: { type: Array, required: true },
+    category: { type: Object, default: null },
 });
 
 const selected = reactive(
     Object.fromEntries(props.results.map((result, index) => [index, !!result.match]))
 );
 
-const selectedCategoryIds = ref([]);
+const selectedCategoryIds = ref(props.category ? [props.category.id] : []);
 const answers = reactive(Object.fromEntries(props.results.map((result, index) => [index, result.custom_answer ?? ''])));
 
 const selectedCount = computed(() => Object.values(selected).filter(Boolean).length);
@@ -35,7 +36,9 @@ const confirmImport = () => {
             } : null))
             .filter(Boolean),
         category_ids: selectedCategoryIds.value,
-    })).post(route('admin.tracks.import.store'));
+    })).post(props.category
+        ? route('admin.categories.import.store', props.category.id)
+        : route('admin.tracks.import.store'));
 };
 </script>
 
@@ -48,7 +51,7 @@ const confirmImport = () => {
         </template>
 
         <div class="mx-auto max-w-3xl space-y-4 px-4 py-10 sm:px-6 lg:px-8">
-            <div v-if="categories.length" class="overflow-hidden bg-white p-4 shadow sm:rounded-lg dark:bg-gray-800">
+            <div v-if="!category && categories.length" class="overflow-hidden bg-white p-4 shadow sm:rounded-lg dark:bg-gray-800">
                 <h3 class="font-bold text-gray-900 dark:text-white">{{ $t('Categories for this import') }}</h3>
 
                 <CategoryPicker v-model="selectedCategoryIds" :categories="categories" class="mt-3" />

@@ -718,7 +718,7 @@ onUnmounted(() => {
                 </div>
             </div>
 
-            <div class="qp-card h-fit lg:sticky lg:top-24">
+            <div v-if="status === 'lobby'" class="qp-card h-fit lg:sticky lg:top-24">
                 <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ $t('Invite friends') }}</h3>
 
                 <div class="mt-3 flex items-center gap-2">

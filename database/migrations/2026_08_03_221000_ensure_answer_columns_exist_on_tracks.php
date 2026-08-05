@@ -23,14 +23,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        $columns = collect(['answer_mode', 'custom_answer'])
-            ->filter(fn (string $column) => Schema::hasColumn('tracks', $column))
-            ->all();
-
-        if ($columns !== []) {
-            Schema::table('tracks', function (Blueprint $table) use ($columns) {
-                $table->dropColumn($columns);
-            });
-        }
+        // This migration repairs a potentially inconsistent production schema.
+        // Its rollback intentionally keeps the columns owned by the original migration.
     }
 };

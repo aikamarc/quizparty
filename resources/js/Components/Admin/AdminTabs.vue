@@ -5,6 +5,13 @@ import { Link } from '@inertiajs/vue3';
 <template>
     <div class="mt-3 flex gap-4 border-b border-gray-200 text-sm font-medium dark:border-gray-700">
         <Link
+            :href="route('admin.culture-quiz.index')"
+            class="border-b-2 pb-2"
+            :class="route().current('admin.culture-quiz.*') ? 'border-violet-600 text-violet-600' : 'border-transparent text-gray-500'"
+        >
+            Culture Quiz
+        </Link>
+        <Link
             :href="route('admin.tracks.index')"
             class="border-b-2 pb-2"
             :class="route().current('admin.tracks.*')

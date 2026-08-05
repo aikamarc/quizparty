@@ -88,6 +88,16 @@ const submit = () => {
             </div>
         </form>
 
+        <Link
+            v-if="route().has('local.login')"
+            :href="route('local.login')"
+            method="post"
+            as="button"
+            class="mt-4 flex w-full items-center justify-center rounded-md border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800 shadow-sm transition hover:bg-amber-100"
+        >
+            Connexion locale rapide
+        </Link>
+
         <div class="mt-4 flex items-center gap-4">
             <div class="h-px flex-1 bg-gray-200" />
             <span class="text-xs uppercase text-gray-400">{{ $t('or') }}</span>

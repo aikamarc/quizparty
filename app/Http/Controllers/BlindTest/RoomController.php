@@ -14,6 +14,7 @@ use App\Models\Category;
 use App\Models\Track;
 use App\Models\User;
 use App\Services\BlindTest\RoundManager;
+use App\Services\StaleGameRoomCleaner;
 use App\Support\SafeBroadcast;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -27,8 +28,9 @@ use Inertia\Response;
 
 class RoomController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request, StaleGameRoomCleaner $cleaner): Response
     {
+        $cleaner->cleanupIfDue();
         $user = $request->user();
 
         $rooms = GameRoom::where('status', '!=', 'finished')
@@ -68,6 +70,7 @@ class RoomController extends Controller
             'host_id' => $request->user()->id,
             'is_public' => $validated['is_public'] ?? false,
             'host_last_seen_at' => now(),
+            'last_activity_at' => now(),
         ]);
 
         $room->players()->create(['user_id' => $request->user()->id]);
@@ -170,6 +173,12 @@ class RoomController extends Controller
             ]);
         }
 
+        if ($room->status !== 'lobby') {
+            throw ValidationException::withMessages([
+                'code' => __('This game can no longer be joined.'),
+            ]);
+        }
+
         return redirect()->route('blindtest.rooms.show', $room);
     }
 
@@ -218,7 +227,7 @@ class RoomController extends Controller
     public function heartbeat(Request $request, GameRoom $room): JsonResponse
     {
         if ($room->host_id === $request->user()->id) {
-            $room->update(['host_last_seen_at' => now()]);
+            $room->update(['host_last_seen_at' => now(), 'last_activity_at' => now()]);
         }
 
         return response()->json(['ok' => true]);
@@ -238,6 +247,10 @@ class RoomController extends Controller
     public function state(Request $request, GameRoom $room): JsonResponse
     {
         abort_unless($room->players()->where('user_id', $request->user()->id)->exists(), 403);
+
+        if (! $room->last_activity_at || $room->last_activity_at->lte(now()->subSeconds(15))) {
+            $room->updateQuietly(['last_activity_at' => now()]);
+        }
 
         // Nudge the game forward if it's due for a transition — this is what makes
         // round timeouts, reveals, and round-advancing work reliably even when the

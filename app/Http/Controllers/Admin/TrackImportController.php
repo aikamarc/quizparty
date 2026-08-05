@@ -16,10 +16,22 @@ class TrackImportController extends Controller
 {
     public function create(): Response
     {
-        return Inertia::render('Admin/Tracks/Import');
+        return Inertia::render('Admin/Tracks/Import', ['category' => null]);
     }
 
-    public function preview(Request $request, DeezerClient $deezer): Response
+    public function createForCategory(Category $category): Response
+    {
+        return Inertia::render('Admin/Tracks/Import', ['category' => $category]);
+    }
+
+    public function previewForCategory(Request $request, Category $category, DeezerClient $deezer): Response
+    {
+        $request->merge(['answer_mode' => $category->answer_mode]);
+
+        return $this->preview($request, $deezer, $category);
+    }
+
+    public function preview(Request $request, DeezerClient $deezer, ?Category $category = null): Response
     {
         $request->validate([
             'list' => ['required', 'string'],
@@ -34,19 +46,17 @@ class TrackImportController extends Controller
             ->values();
 
         $results = $lines->map(function (string $line) use ($answerMode, $deezer) {
-            $parts = $answerMode === 'title_only'
-                ? preg_split('/\s+(?:-|–|—)\s+/u', $line, 3)
-                : [];
+            $parts = preg_split('/\s*\|\|\s*/u', $line, 3);
             $parts = collect($parts)->map(fn ($part) => trim($part, " \t\n\r\0\x0B*_"))->all();
-            $answer = $parts[0] ?? null;
+            $answer = $answerMode === 'title_only' ? ($parts[0] ?? null) : null;
             $title = $parts[1] ?? null;
-            $artist = $parts[2] ?? null;
+            $artist = $answerMode === 'title_only' ? ($parts[2] ?? null) : ($parts[0] ?? null);
 
             // Exclude the expected answer from the Deezer query. Otherwise a
             // franchise name such as "Toy Story" can skew the search results.
             $search = filled($title)
                 ? 'track:"'.addcslashes($title, '"').'"'.(filled($artist) ? ' artist:"'.addcslashes($artist, '"').'"' : '')
-                : $line;
+                : str_replace('||', ' ', $line);
 
             return [
                 'input' => $line,
@@ -73,10 +83,32 @@ class TrackImportController extends Controller
         return Inertia::render('Admin/Tracks/ImportPreview', [
             'results' => $results,
             'categories' => $categories,
+            'category' => $category,
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function storeForCategory(Request $request, Category $category): RedirectResponse
+    {
+        $tracks = collect($request->input('tracks', []))
+            ->map(function (array $track) use ($category) {
+                $track['answer_mode'] = $category->answer_mode;
+                $track['custom_answer'] = $category->answer_mode === 'title_only'
+                    ? ($track['custom_answer'] ?? null)
+                    : null;
+
+                return $track;
+            })
+            ->all();
+
+        $request->merge([
+            'tracks' => $tracks,
+            'category_ids' => [$category->id],
+        ]);
+
+        return $this->store($request, $category);
+    }
+
+    public function store(Request $request, ?Category $category = null): RedirectResponse
     {
         $validated = $request->validate([
             'tracks' => ['required', 'array'],
@@ -128,7 +160,11 @@ class TrackImportController extends Controller
             }
         }
 
-        return redirect()->route('admin.tracks.index')->with('flash', [
+        $redirect = $category
+            ? redirect()->route('admin.categories.show', $category)
+            : redirect()->route('admin.tracks.index');
+
+        return $redirect->with('flash', [
             'imported' => $imported,
             'total' => count($validated['tracks']),
         ]);

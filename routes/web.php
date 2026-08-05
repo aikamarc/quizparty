@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\CultureQuizController as AdminCultureQuizController;
 use App\Http\Controllers\Admin\TrackController;
 use App\Http\Controllers\Admin\TrackImportController;
 use App\Http\Controllers\Admin\SonglessController as AdminSonglessController;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\Auth\LocalLoginController;
 use App\Http\Controllers\BlindTest\GuessController;
 use App\Http\Controllers\BlindTest\RoomController;
 use App\Http\Controllers\FriendController;
@@ -13,6 +15,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\PlayerProfileController;
 use App\Http\Controllers\SonglessController;
+use App\Http\Controllers\CultureQuiz\RoomController as CultureQuizRoomController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Jetstream\Http\Controllers\Inertia\UserProfileController;
 
@@ -25,6 +28,12 @@ Route::get('/locale/{locale}', LocaleController::class)
 
 Route::get('/auth/google/redirect', [GoogleController::class, 'redirect'])->name('auth.google.redirect');
 Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('auth.google.callback');
+
+if (app()->environment('local')) {
+    Route::post('/auth/local-login', LocalLoginController::class)
+        ->middleware('guest')
+        ->name('local.login');
+}
 
 // Public: a shared room link must work even for visitors without an account —
 // they land on the same preview/lobby page and can join as a guest from there.
@@ -47,6 +56,22 @@ Route::middleware([
     Route::patch('/guest/name', [GuestController::class, 'updateName'])->name('guest.name.update');
 
     Route::get('/friends', [FriendController::class, 'index'])->name('friends.index');
+
+    Route::prefix('culture-quiz')->name('culture-quiz.')->group(function () {
+        Route::get('/', [CultureQuizRoomController::class, 'index'])->name('index');
+        Route::post('/rooms', [CultureQuizRoomController::class, 'store'])->name('rooms.store');
+        Route::post('/rooms/join-by-code', [CultureQuizRoomController::class, 'resolveCode'])->name('rooms.resolve-code');
+        Route::get('/rooms/{room}', [CultureQuizRoomController::class, 'show'])->name('rooms.show');
+        Route::post('/rooms/{room}/join', [CultureQuizRoomController::class, 'join'])->name('rooms.join');
+        Route::post('/rooms/{room}/invite', [CultureQuizRoomController::class, 'invite'])->name('rooms.invite');
+        Route::patch('/rooms/{room}', [CultureQuizRoomController::class, 'update'])->name('rooms.update');
+        Route::post('/rooms/{room}/start', [CultureQuizRoomController::class, 'start'])->name('rooms.start');
+        Route::get('/rooms/{room}/state', [CultureQuizRoomController::class, 'state'])->name('rooms.state');
+        Route::post('/rooms/{room}/answer', [CultureQuizRoomController::class, 'answer'])->name('rooms.answer');
+        Route::post('/rooms/{room}/answers/{answer}/judge', [CultureQuizRoomController::class, 'judge'])->name('rooms.answers.judge');
+        Route::post('/rooms/{room}/answers/{answer}/poll', [CultureQuizRoomController::class, 'openPoll'])->name('rooms.answers.poll');
+        Route::post('/rooms/{room}/answers/{answer}/vote', [CultureQuizRoomController::class, 'vote'])->name('rooms.answers.vote');
+    });
     Route::post('/friends', [FriendController::class, 'store'])->name('friends.store');
     Route::patch('/friends/{friendship}', [FriendController::class, 'update'])->name('friends.update');
     Route::delete('/friends/{friendship}', [FriendController::class, 'destroy'])->name('friends.destroy');
@@ -93,9 +118,20 @@ Route::middleware([
     Route::put('/tracks/{track}', [TrackController::class, 'update'])->name('tracks.update');
 
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+    Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
+    Route::get('/categories/{category}/import', [TrackImportController::class, 'createForCategory'])->name('categories.import.create');
+    Route::post('/categories/{category}/import/preview', [TrackImportController::class, 'previewForCategory'])->name('categories.import.preview');
+    Route::post('/categories/{category}/import', [TrackImportController::class, 'storeForCategory'])->name('categories.import.store');
     Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
     Route::patch('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+
+    Route::get('/culture-quiz', [AdminCultureQuizController::class, 'index'])->name('culture-quiz.index');
+    Route::post('/culture-quiz/categories', [AdminCultureQuizController::class, 'storeCategory'])->name('culture-quiz.categories.store');
+    Route::get('/culture-quiz/categories/{category}', [AdminCultureQuizController::class, 'show'])->name('culture-quiz.categories.show');
+    Route::post('/culture-quiz/categories/{category}/questions', [AdminCultureQuizController::class, 'storeQuestion'])->name('culture-quiz.questions.store');
+    Route::post('/culture-quiz/categories/{category}/import', [AdminCultureQuizController::class, 'import'])->name('culture-quiz.import');
+    Route::delete('/culture-quiz/questions/{question}', [AdminCultureQuizController::class, 'destroyQuestion'])->name('culture-quiz.questions.destroy');
     Route::delete('/songless/today', [AdminSonglessController::class, 'resetToday'])->name('songless.reset-today');
 });
 

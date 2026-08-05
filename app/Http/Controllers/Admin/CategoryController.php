@@ -15,10 +15,24 @@ class CategoryController extends Controller
     public function index(): Response
     {
         return Inertia::render('Admin/Categories/Index', [
-            'categories' => Category::whereNull('parent_id')
-                ->with('children')
+            'categories' => Category::query()
+                ->with('parent:id,name')
+                ->withCount('tracks')
                 ->orderBy('name')
                 ->get(),
+        ]);
+    }
+
+    public function show(Category $category): Response
+    {
+        $tracks = $category->tracks()
+            ->select(['tracks.id', 'title', 'artist', 'custom_answer', 'answer_mode', 'album', 'cover_url', 'preview_url'])
+            ->orderByRaw("LOWER(CASE WHEN tracks.answer_mode = 'title_only' THEN COALESCE(tracks.custom_answer, tracks.title) ELSE tracks.title END)")
+            ->paginate(50);
+
+        return Inertia::render('Admin/Categories/Show', [
+            'category' => $category,
+            'tracks' => $tracks,
         ]);
     }
 
@@ -26,6 +40,7 @@ class CategoryController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'answer_mode' => ['required', 'in:artist_title,title_only'],
             'image' => ['nullable', 'image', 'max:4096'],
             'parent_id' => [
                 'nullable',
@@ -52,6 +67,7 @@ class CategoryController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'answer_mode' => ['required', 'in:artist_title,title_only'],
             'image' => ['nullable', 'image', 'max:4096'],
         ]);
 

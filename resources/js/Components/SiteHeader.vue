@@ -60,6 +60,7 @@ const logout = () => router.post(route('logout'));
                         </span>
                     </NavLink>
                     <NavLink v-if="user" :href="route('songless.index')" :active="route().current('songless.*')">Songless</NavLink>
+                    <NavLink v-if="user" :href="route('culture-quiz.index')" :active="route().current('culture-quiz.*')">Culture Quiz</NavLink>
                     <NavLink v-if="user?.is_admin" :href="route('admin.tracks.index')" :active="route().current('admin.*')">Admin</NavLink>
                 </nav>
             </div>
@@ -114,6 +115,7 @@ const logout = () => router.post(route('logout'));
                     Blind Test <span v-if="liveRoomsCount > 0">({{ liveRoomsCount }})</span>
                 </ResponsiveNavLink>
                 <ResponsiveNavLink v-if="user" :href="route('songless.index')" :active="route().current('songless.*')">Songless</ResponsiveNavLink>
+                <ResponsiveNavLink v-if="user" :href="route('culture-quiz.index')" :active="route().current('culture-quiz.*')">Culture Quiz</ResponsiveNavLink>
                 <ResponsiveNavLink v-if="user?.is_admin" :href="route('admin.tracks.index')" :active="route().current('admin.*')">Admin</ResponsiveNavLink>
             </div>
 
